@@ -4,10 +4,10 @@
 
 ```
 AI-3/
-├─member1/
-├─member2/
-├─member3/
-└─member4/
+├─ member1/
+├─ member2/
+├─ member3/
+└─ member4/
 ```
 
 #### 브랜치명 예시
