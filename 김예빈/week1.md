@@ -90,7 +90,7 @@ y_test_5 = (y_test == "5")
 
 ### SGDClassifier
 
-노트북에서는 **확률적 경사 하강법(Stochastic Gradient Descent)**을
+노트북에서는 확률적 경사 하강법(Stochastic Gradient Descent)을
 사용하는 `SGDClassifier`를 이용한다.
 
 `SGDClassifier`의 특징은 다음과 같다.
@@ -176,10 +176,10 @@ MNIST에서 숫자 5는 전체 데이터 중 일부이므로, 무조건 `"5가 �
 
 ### 이론
 
-**오차 행렬(Confusion Matrix)**은 분류기가 어떤 클래스를 어떤 클래스로
+오차 행렬(Confusion Matrix)은 분류기가 어떤 클래스를 어떤 클래스로
 잘못 분류했는지 확인하는 방법이다.
 
-모든 A/B 쌍에 대해 **실제 클래스 A의 샘플이 클래스 B로 분류된 횟수**를
+모든 A/B 쌍에 대해 실제 클래스 A의 샘플이 클래스 B로 분류된 횟수를
 센다.
 
 오차 행렬을 만들려면 실제 타깃과 비교할 예측값이 필요하다.\
