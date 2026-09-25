@@ -1,4 +1,53 @@
-## 3.1. MNIST 데이터셋
+## 계층적 샘플링을 분리해 둔 훈련 데이터셋 strat_train_set의 복사본을 만들어 housing 변수에 저장하는 코드
+housing = strat_train_set.copy()
+
+## 위경도 기준 산점
+```
+housing.plot(kind="scatter", x="longitude", y="latitude", grid=True)
+save_fig("bad_visualization_plot")
+plt.show()
+```
+## "bad_visualization" 개선 코드
+```
+housing.plot(kind="scatter", x="longitude", y="latitude", grid=True,
+             s=housing["population"] / 100, label="population",
+             c="median_house_value", cmap="jet", colorbar=True,
+             legend=True, figsize=(10, 7))
+save_fig("housing_prices_scatterplot")  # extra code
+plt.show()
+```
+
+## 상관관계 분석
+숫자형 변수들 간의 상관계수를 계산하여 각 특성(feature)이 목표 변수와 얼마나 연관되어 있는지 파악
+상관계수는 -1~1 범위이며, 1에 가까울수록 강한 양의 상관관계, -1에 가까울수록 강한 음의 상관관계, 0에 가까울수록 상관관계가 거의 없음을 의미함
+```
+corr_matrix = housing.corr(numeric_only=True)
+```
+
+
+## 목표 변수와의 상관관계 확인
+- 상관관계 행렬에서 'median_house_value(주택 가격) 열만 추출하여, 상관계수가 높은 순서대로 정렬함. 
+- 이를 통해 어떤 특성이 주택 가격과 가장 밀접하게 연관되어 있는지 한눈에 확인할 수 있음.
+- 일반적으로 중간 소득('median_income')이 가장 높은 양의 상관관계를 보이는 것으로 알려져 있음.
+```
+corr_matrix["median_house_value"].sort_values(ascending=False)
+```
+
+## 산점도 행렬로 변수 간 관계 시각화
+- 앞서 상관관계가 높게 나타난 주요 변수(`median_house_value`, `median_income`, `total_rooms`, `housing_median_age`)을 골라, 이들 간의 관계를 한 번에 시각화합니다.
+- 'scatter_matrix': 선택한 변수들의 모든 조합에 대해 산점도를 그려주는 함수. 결과는 4*4 격자 형태의 그래프로 나타남.
+- 대각선에는 각 변수 자신의 분포를 나타내는 히스토그램이 그려지고, 나머지 칸에는 두 변수 간의 산점도가 표시됨.
+- 이를 통해 어떤 변수 쌍이 뚜렷한 선형 관계를 보이는지 시각적으로 확인할 수 있음
+```
+from pandas.plotting import scatter_matrix
+
+attributes = ["median_house_value", "median_income", "total_rooms",
+              "housing_median_age"]
+scatter_matrix(housing[attributes], figsize=(12, 8))
+save_fig("scatter_matrix_plot")  # 추가 코드
+plt.show()
+```
+## MNIST 데이터셋
 미국의 고등학생과 인구조사국 직원들이 손을 쓴 70,000개의 숫자 이미지로 구성된 데이터셋
 `sklearn.datasets`모듈: 데이터셋을 다운로드하거나 생성하는 세 종류를 함수를 제공, 함수명에 사용된 접두사에 따라 용도가 다름
 - `fetch_*`: 다운로드 및 적재. `sklearn.utils.Bunch` 객체 반환.
@@ -51,7 +100,7 @@ sdg_clf.fit(X_train, y_train_5)
 - 정확도
 - 정밀도와 재현율
 - ROC 곡선의 AUS
-### 3.3.1 오차 행렬
+### 오차 행렬
 오차행렬(confusion matrix): 클래스별 예측 결과를 정리한 행렬. 이진 분류기인 숫자-5 감별기에 대한 오차 행렬은 아래와 같은 (2,2)모양의 2차원 (넘파이) 어레이로 생성됨
 
 아래코드는 교차 검증을 이용하여 예측을 수행한 다음 이를 이용하여 오차 행렬을 생성한다.
@@ -70,14 +119,14 @@ arrary([[53892, 687],
 - [0][1]=687(거짓 양성, FP): 실제로는 5가 아닌데, 모델이 "5다"라고 잘못 예측한 개수
 - [1][0]=1891(거짓 음성, FN): 실제로 5인데, 모델이 "5아님"이라고 잘못 예측한 개수
 - [1][1]=3530(진짜 양성, TP): 실제로 5인데, 모델도 "5다"라고 정확히 예측한 개수
-### 3.3.2. 정확도
+### 정확도
 정확도: 라벨을 정확하게 맞힌 비율
 $$
 \text{정확도} = \frac{TP + TN}{TP + FP + TN + FN}
 $$
 #### 정확도의 한계
 정확도가 96% 정도로 매우 좋은 결과로 보임. 하지만 "무조건 5가 아니다"라고 예측하는 모델도 90%의 정홛도를 보임. 튿정 범주에 속하는 데이터가 상대적으로 너무 ㅁ낳을 경우 정확도는 신뢰하기 어려운 평가 기준임을 잘 보여주는 사례다. 이런 경우엔 정롹도 보다는 정밀도와 재현율을 이용하여 평가하는데 성능이 상대적으로 낮게 나옴. 특히 재현율의 성능이 매우 낮음.
-### 3.3.3. 정밀도와 재현율
+### 정밀도와 재현율
 - 정밀도(precision): 양성 예측의 정확도를 가리킴
 -> 숫자 5라고 예측된 값들 중에서 진짜로 5인 숫자들의 비율
 $$
@@ -108,7 +157,7 @@ $$
    - 정밀도: 안전하다고 판단된 동영상 중에서 실제로도 안전한 동영상의 비율
    - 재현율: 실제로 좋은 동영상 중에서 좋은 동여상이라 판정되는 동영상 비율
    - 다른 예제: 스팸 필터링
-### 3.3.4. 정밀도/재현율 트레이드오프
+### 정밀도/재현율 트레이드오프
 분류기의 결정 함수는 각 샘플에 대해 점수를 계산하며 이 점수가 결저 임계값보다 같거나 크면 양성, 아니면 음성으로 판단.
 
 EX) `SGDClassifier`는 `decision_function()메서드를 결정 함수로 이용하며, 결정 함숫값이 0보다 작으면 음성, 0보다 같거나 크면 양성으로 판정.
@@ -180,7 +229,7 @@ $$
 - 랜덤 포레스트 분류기는 `predict_proba()`메서드를 결정 함수로 사용.
   - `predict_proba()`메서드: 입력 샘플에 대해 각 클래스에 속할 확률 계산
 
-### 3.4. 다중 클래스 분류
+### 다중 클래스 분류
 #### 다중 클래스 분류 지원 모델
 - `LogisiticRegression`모델
   - 딥러닝 모델에서도 많이 활용됨
@@ -217,10 +266,10 @@ scaler = MinMaxScaler()
 X_train_scaled = scaler.fit_transform(X_train.astype("float64"))
 cross_val_score(sgd_clf, X_train_scaled, y_train, cv=3, scoring="accuracy")
 ```
-## 3.5. 오류 분석
+## 오류 분석
 그리드 탐색, 랜덤 탐색 등을 이용한 모델 튜닝 과정을 실행하여 최선의 모델을 찾았다고 가정한다. 이제 오류 분석을 통해 모델의 성능을 평가하고 개선시키는 방안을 모색하는 과정을 살펴 본다. 먼저 훈련된 모델의 성능을 평가하기 위해 오차 행렬을 활용한다.
 
-### 3.5.1. 다중 크래스 분류 모델의 오차 행렬
+### 다중 크래스 분류 모델의 오차 행렬
 먼저 `cross_val_predict()` 함수를 이용하여 교차 검증 방식으로 표준화 스케일링된 훈련셋에 대한 모델의 예측값을 계산한다.
 
 ```python
@@ -278,5 +327,5 @@ ConfusionMatrixDisplay.from_predictions(y_train, y_train_pred,
 - 양성: 5로 판정
 
 
-### 3.5.2. 데이터 증식
+### 데이터 증식
 사람 눈으로 보더라도 3과 5의 구분이 매우 어려울 수 있다. 여기서 사용한 SGD 분류 모델은 선형 회귀를 사용하기에 특히나 성능이 좋지 않다. 따라서 보다 좋은 성능의 모델을 사용할 수도 있지만 기본적으로 보다 많은 훈련 이미지가 필요하다. 새로운 이미지를 구할 수 있으면 좋겠지만 일반적으로 매우 어렵다. 반면에 기존의 이미지를 조금씩 회전하거나, 뒤집거나, 이동하는 방식 등으로 보다 많은 이미지를 훈련셋에 포함시킬 수 있다. 이런 방식을 데이터 증식data augmentation이라 부른다.
